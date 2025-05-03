@@ -8,7 +8,7 @@ type FetchOptions = {
 export async function fetchApi(endpoint: string, options: FetchOptions = {}) {
   const token = localStorage.getItem("token")
   // const baseUrl = "http://localhost:3001/api"
-  const baseUrl = "http://ec2-65-0-21-246.ap-south-1.compute.amazonaws.com/resort/api"
+  const baseUrl = "https://playlist-backend.tech/resort/api"
   const url = `${baseUrl}${endpoint}`
 
   const headers: Record<string, string> = {
