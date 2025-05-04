@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/auth-context"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,6 +38,7 @@ type Invoice = {
 
 export default function InvoicesPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("all")
@@ -103,6 +105,8 @@ export default function InvoicesPage() {
     }
   }
 
+  const canCreateInvoice = user?.role === "admin" || user?.role === "reception"
+
   return (
     <DashboardLayout title="Invoices">
       <Card>
@@ -112,9 +116,15 @@ export default function InvoicesPage() {
             <CardDescription>Manage and view all invoices</CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="gap-1" onClick={() => router.push("/invoices/new")}>
+            {canCreateInvoice && (
+              <Button variant="outline" className="gap-1" onClick={() => router.push("/invoices/new")}>
+                <FileText className="h-4 w-4" />
+                New Invoice
+              </Button>
+            )}
+            <Button variant="outline" className="gap-1" onClick={() => router.push("/invoices/aggregated")}>
               <FileText className="h-4 w-4" />
-              New Invoice
+              Aggregated Invoices
             </Button>
           </div>
         </CardHeader>

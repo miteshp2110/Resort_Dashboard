@@ -240,6 +240,16 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                       <DialogDescription>Send this invoice to the guest via email.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="emailAddress">Email Address</Label>
+                        <Input
+                          id="emailAddress"
+                          type="email"
+                          value={emailAddress}
+                          onChange={(e) => setEmailAddress(e.target.value)}
+                          placeholder="Enter email address"
+                        />
+                      </div>
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)}>
