@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { getGuests, createGuest } from "@/lib/api"
 import { Plus, Search } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -56,11 +56,7 @@ export default function GuestsPage() {
       const data = await getGuests(search)
       setGuests(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch guests",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch Guests")
     } finally {
       setLoading(false)
     }
@@ -81,20 +77,13 @@ export default function GuestsPage() {
         check_out_date: new Date(checkOutDate).toISOString(),
       })
 
-      toast({
-        title: "Success",
-        description: "Guest created successfully",
-      })
+      toast.success("Guests added successfully.")
 
       resetForm()
       setIsAddDialogOpen(false)
       fetchGuests()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create guest",
-        variant: "destructive",
-      })
+      toast.error("Failed to add guest")
     }
   }
 

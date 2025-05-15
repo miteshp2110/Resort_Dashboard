@@ -7,7 +7,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { getInvoices } from "@/lib/api"
 import { Eye, FileText, Printer } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -67,11 +67,7 @@ export default function InvoicesPage() {
       const data = await getInvoices(params)
       setInvoices(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch invoices",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch invoices")
     } finally {
       setLoading(false)
     }

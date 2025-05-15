@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
 import { getGuests, getServices, createInvoice } from "@/lib/api"
 import { ArrowLeft, Plus, Trash2, Search } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuth } from "@/context/auth-context"
+import {toast} from "sonner"
 
 type Guest = {
   id: number
@@ -49,6 +49,7 @@ export default function NewInvoicePage() {
   const [guestId, setGuestId] = useState("")
   const [roomNumber, setRoomNumber] = useState("")
   const [guestName, setGuestName] = useState("")
+  const [bookingDate, setBookingDate] = useState("")
   const [guestMobile, setGuestMobile] = useState("")
   const [paymentStatus, setPaymentStatus] = useState("pending")
   const [paymentMethod, setPaymentMethod] = useState("cash")
@@ -59,6 +60,7 @@ export default function NewInvoicePage() {
   const [isNewGuest, setIsNewGuest] = useState(false)
   const [guestSearchTerm, setGuestSearchTerm] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
+
 
   useEffect(() => {
     // Redirect if user doesn't have permission
@@ -148,12 +150,8 @@ export default function NewInvoicePage() {
   }
 
   const handleCreateInvoice = async () => {
-    if (!guestName || !roomNumber || invoiceItems.length === 0) {
-      toast({
-        title: "Error",
-        description: "Please fill all required fields and add at least one item",
-        variant: "destructive",
-      })
+    if (!guestName  || invoiceItems.length === 0) {
+      toast.error("Please fill all required fields and add at least one item")
       return
     }
 
@@ -176,22 +174,16 @@ export default function NewInvoicePage() {
         payment_status: paymentStatus,
         payment_method: paymentMethod,
         notes,
+        bookingDate: bookingDate
       }
 
       const response = await createInvoice(invoiceData)
 
-      toast({
-        title: "Success",
-        description: "Invoice created successfully",
-      })
+      toast.success("Invoice Created Successfully")
 
       router.push(`/invoices/${response.invoice.id}`)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create invoice",
-        variant: "destructive",
-      })
+      toast.error("Failed to create Invoice")
     } finally {
       setLoading(false)
     }
@@ -242,30 +234,30 @@ export default function NewInvoicePage() {
                     <Label htmlFor="guest">Guest</Label>
                     <div className="flex flex-col gap-2">
                       <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"/>
                         <Input
-                          type="search"
-                          placeholder="Search guests..."
-                          className="pl-8"
-                          value={searchTerm}
-                          onChange={(e) => {
-                            setSearchTerm(e.target.value)
-                            if (e.target.value.length > 2) {
-                              fetchGuests(e.target.value)
-                            }
-                          }}
+                            type="search"
+                            placeholder="Search guests..."
+                            className="pl-8"
+                            value={searchTerm}
+                            onChange={(e) => {
+                              setSearchTerm(e.target.value)
+                              if (e.target.value.length > 2) {
+                                fetchGuests(e.target.value)
+                              }
+                            }}
                         />
                       </div>
                       <Select value={guestId} onValueChange={handleGuestChange}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select guest or enter details below" />
+                          <SelectValue placeholder="Select guest or enter details below"/>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="0">Enter guest details manually</SelectItem>
                           {guests.map((guest) => (
-                            <SelectItem key={guest.id} value={guest.id.toString()}>
-                              {guest.name} (Room {guest.room_number})
-                            </SelectItem>
+                              <SelectItem key={guest.id} value={guest.id.toString()}>
+                                {guest.name} (Room {guest.room_number})
+                              </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -277,37 +269,47 @@ export default function NewInvoicePage() {
                   <div className="space-y-2">
                     <Label htmlFor="roomNumber">Room Number</Label>
                     <Input
-                      id="roomNumber"
-                      value={roomNumber}
-                      onChange={(e) => setRoomNumber(e.target.value)}
-                      placeholder="Room number"
-                      disabled={!isNewGuest && !!guestId}
+                        id="roomNumber"
+                        value={roomNumber}
+                        onChange={(e) => setRoomNumber(e.target.value)}
+                        placeholder="Room number"
+                        disabled={!isNewGuest && !!guestId}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="guestMobile">Mobile</Label>
                     <Input
-                      id="guestMobile"
-                      value={guestMobile}
-                      onChange={(e) => setGuestMobile(e.target.value)}
-                      placeholder="Mobile number"
-                      disabled={!isNewGuest && !!guestId}
+                        id="guestMobile"
+                        value={guestMobile}
+                        onChange={(e) => setGuestMobile(e.target.value)}
+                        placeholder="Mobile number"
+                        disabled={!isNewGuest && !!guestId}
                     />
                   </div>
                 </div>
 
                 {!isNewGuest && (
-                  <div className="space-y-2">
-                    <Label htmlFor="guestName">Guest Name</Label>
-                    <Input
-                      id="guestName"
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      placeholder="Guest name"
-                      disabled={!!guestId}
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="guestName">Guest Name</Label>
+                      <Input
+                          id="guestName"
+                          value={guestName}
+                          onChange={(e) => setGuestName(e.target.value)}
+                          placeholder="Guest name"
+                          disabled={!!guestId}
+                      />
+                    </div>
                 )}
+                <div className="space-y-2">
+                  <Label htmlFor="bookingDate">Booking Date</Label>
+                  <Input
+                      type="date"
+                      id="bookingDate"
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                      placeholder="the booking date"
+                  />
+                </div>
               </div>
 
               <div className="space-y-4">

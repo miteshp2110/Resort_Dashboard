@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { getSettings, updateSettings } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
@@ -62,11 +62,7 @@ export default function SettingsPage() {
       setTaxRate(data.tax_rate?.toString() || "")
       setLogoPreview(data.logo_path ? `http://localhost:3001/${data.logo_path}` : null)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch settings",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch settings")
     } finally {
       setLoading(false)
     }
@@ -109,18 +105,11 @@ export default function SettingsPage() {
 
       await updateSettings(formData)
 
-      toast({
-        title: "Success",
-        description: "Settings updated successfully",
-      })
+      toast.success("Settings updated successfully")
 
       fetchSettings()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update settings",
-        variant: "destructive",
-      })
+      toast.error("Failed to update settings")
     } finally {
       setSaving(false)
     }

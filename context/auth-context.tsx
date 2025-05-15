@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json()
 
       if (!response.ok) {
+        alert("Wrong Username or Password")
         throw new Error(data.message || "Login failed")
       }
 

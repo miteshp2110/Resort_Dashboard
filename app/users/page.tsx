@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { getUsers, createUser, updateUser, deleteUser, updateUserPassword } from "@/lib/api"
 import { Pencil, Plus, Trash2, Key } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -68,11 +68,7 @@ export default function UsersPage() {
       const data = await getUsers()
       setUsers(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch users",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch users")
     } finally {
       setLoading(false)
     }
@@ -88,20 +84,13 @@ export default function UsersPage() {
         role,
       })
 
-      toast({
-        title: "Success",
-        description: "User created successfully",
-      })
+      toast.success("User created successfully")
 
       resetForm()
       setIsAddDialogOpen(false)
       fetchUsers()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create user",
-        variant: "destructive",
-      })
+      toast.error("Failed to create user")
     }
   }
 
@@ -115,20 +104,13 @@ export default function UsersPage() {
         role,
       })
 
-      toast({
-        title: "Success",
-        description: "User updated successfully",
-      })
+      toast.success("User updated successfully")
 
       resetForm()
       setIsEditDialogOpen(false)
       fetchUsers()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update user",
-        variant: "destructive",
-      })
+      toast.error("Failed to update user")
     }
   }
 
@@ -136,18 +118,11 @@ export default function UsersPage() {
     try {
       await deleteUser(userId)
 
-      toast({
-        title: "Success",
-        description: "User deleted successfully",
-      })
+      toast.success("User deleted successfully")
 
       fetchUsers()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete user",
-        variant: "destructive",
-      })
+      toast.error("Failed to delete user")
     }
   }
 
@@ -157,19 +132,12 @@ export default function UsersPage() {
     try {
       await updateUserPassword(selectedUser.id, newPassword)
 
-      toast({
-        title: "Success",
-        description: "Password updated successfully",
-      })
+      toast.success("Password updated successfully")
 
       setNewPassword("")
       setIsPasswordDialogOpen(false)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update password",
-        variant: "destructive",
-      })
+      toast.error("Failed to update password")
     }
   }
 

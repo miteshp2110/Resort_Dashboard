@@ -4,8 +4,14 @@ import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { toast } from "@/components/ui/use-toast"
-import { getSalesReport, getGstReport, getKitchenItemsReport } from "@/lib/api"
+import { toast } from "sonner"
+import {
+  getSalesReport,
+  getGstReport,
+  getKitchenItemsReport,
+  downloadSalesReportExcel,
+  downloadGSTReportExcel, downloadKitchenReportExcel, downloadResortReportExcel
+} from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -92,13 +98,57 @@ export default function ReportsPage() {
       const data = await getSalesReport(params)
       setSalesData(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch sales report",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch sales report")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const downloadGSTReport = async () => {
+    try {
+
+      const params = {
+        start_date: format(startDate, "yyyy-MM-dd"),
+        end_date: format(endDate, "yyyy-MM-dd"),
+        type: reportType !== "all" ? reportType : undefined,
+      }
+      downloadGSTReportExcel(params)
+
+    } catch (error) {
+      toast.error("Failed to fetch sales report")
+    } finally {
+    }
+  }
+
+  const downloadKitchenReport = async () => {
+    try {
+
+      const params = {
+        start_date: format(startDate, "yyyy-MM-dd"),
+        end_date: format(endDate, "yyyy-MM-dd"),
+        type: reportType !== "all" ? reportType : undefined,
+      }
+      downloadKitchenReportExcel(params)
+
+    } catch (error) {
+      toast.error("Failed to fetch sales report")
+    } finally {
+    }
+  }
+
+  const downloadSalesReport = async () => {
+    try {
+
+      const params = {
+        start_date: format(startDate, "yyyy-MM-dd"),
+        end_date: format(endDate, "yyyy-MM-dd"),
+        type: reportType !== "all" ? reportType : undefined,
+      }
+      downloadSalesReportExcel(params)
+
+    } catch (error) {
+      toast.error("Failed to fetch sales report")
+    } finally {
     }
   }
 
@@ -114,11 +164,7 @@ export default function ReportsPage() {
       const data = await getGstReport(params)
       setGstData(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch GST report",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch GST report")
     } finally {
       setLoading(false)
     }
@@ -136,11 +182,7 @@ export default function ReportsPage() {
       const data = await getKitchenItemsReport(params)
       setKitchenItemsData(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch kitchen items report",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch kitchen items report")
     } finally {
       setLoading(false)
     }
@@ -165,6 +207,7 @@ export default function ReportsPage() {
         <CardHeader>
           <CardTitle>Reports</CardTitle>
           <CardDescription>View and analyze resort performance data</CardDescription>
+          <Button variant={"default"} onClick={()=>{downloadResortReportExcel()}} >Resort Report Download</Button>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -246,7 +289,7 @@ export default function ReportsPage() {
                               <CardTitle className="text-sm font-medium">Subtotal</CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 pt-0">
-                              <div className="text-2xl font-bold">{formatCurrency(subTCount)}</div>
+                              <div className="text-2xl font-bold">{formatCurrency(salesData.summary.subtotal)}</div>
                             </CardContent>
                           </Card>
                           <Card>
@@ -266,6 +309,10 @@ export default function ReportsPage() {
                             </CardContent>
                           </Card>
                         </div>
+
+                        <Button variant={"default"}  onClick={async()=>{
+                          downloadSalesReport()
+                        }}>Download Report</Button>
 
                         <div>
                           <h3 className="text-lg font-medium mb-4">Daily Sales</h3>
@@ -349,6 +396,7 @@ export default function ReportsPage() {
                             </CardContent>
                           </Card>
 
+
                           <Card>
                             <CardHeader>
                               <CardTitle>Kitchen GST</CardTitle>
@@ -381,6 +429,9 @@ export default function ReportsPage() {
                           </Card>
                         </div>
 
+                        <Button variant={"default"}  onClick={async()=>{
+                          downloadGSTReport()
+                        }}>Download Report</Button>
                         <Card>
                           <CardHeader>
                             <CardTitle>Summary</CardTitle>
@@ -447,6 +498,9 @@ export default function ReportsPage() {
                   <TabsContent value="kitchen-items" className="mt-4">
                     {kitchenItemsData ? (
                       <div>
+                        <Button variant={"default"}  onClick={async()=>{
+                          downloadKitchenReport()
+                        }}>Download Report</Button>
                         <h3 className="text-lg font-medium mb-4">Kitchen Items Sales</h3>
                         <Table>
                           <TableHeader>

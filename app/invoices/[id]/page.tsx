@@ -18,11 +18,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/components/ui/use-toast"
-import { getInvoiceDetails, updateInvoicePayment, emailInvoice } from "@/lib/api"
-import { ArrowLeft, Mail, Printer } from "lucide-react"
+// import {toast, useToast} from "@/components/ui/use-toast"
+import {getInvoiceDetails, updateInvoicePayment, emailInvoice, deleteInvoice} from "@/lib/api"
+import {ArrowLeft, DeleteIcon, Mail, Printer, TrashIcon} from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { toast } from "sonner"
 
 type InvoiceDetail = {
   id: number
@@ -41,6 +42,7 @@ type InvoiceDetail = {
   notes: string | null
   created_by: number
   created_by_name: string
+  booking_date:string
   items: Array<{
     id: number
     invoice_id: number
@@ -56,16 +58,18 @@ type InvoiceDetail = {
 }
 
 export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
+  // const {toast} = useToast()
   const router = useRouter()
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
 
   // Form states
   const [paymentStatus, setPaymentStatus] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("")
-  const [emailAddress, setEmailAddress] = useState("")
 
   useEffect(() => {
     fetchInvoiceDetails()
@@ -78,13 +82,8 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
       setInvoice(data)
       setPaymentStatus(data.payment_status)
       setPaymentMethod(data.payment_method)
-      setEmailAddress(data.guest_email || "")
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch invoice details",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch invoice details. Please try again")
     } finally {
       setLoading(false)
     }
@@ -97,38 +96,42 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
         payment_method: paymentMethod,
       })
 
-      toast({
-        title: "Success",
-        description: "Payment status updated successfully",
-      })
+      // toast({
+      //   title: "Success",
+      //   description: "Payment status updated successfully",
+      // })
+      toast.success("Payment Updated Successfully")
 
       setIsPaymentDialogOpen(false)
       fetchInvoiceDetails()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update payment status",
-        variant: "destructive",
-      })
+      // toast({
+      //   title: "Error",
+      //   description: "Failed to update payment status",
+      //   variant: "destructive",
+      // })
+      toast.error("Failed to udpate status")
     }
   }
 
   const handleSendEmail = async () => {
     try {
       await emailInvoice(Number.parseInt(params.id))
-
-      toast({
-        title: "Success",
-        description: `Invoice sent to ${emailAddress}`,
-      })
-
+      toast.success("Invoice Sent")
       setIsEmailDialogOpen(false)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send email",
-        variant: "destructive",
-      })
+      toast.error("Failed to send invoice email")
+    }
+  }
+
+  const handleDeleteInvoice = async () => {
+    try {
+      await deleteInvoice(Number.parseInt(params.id))
+      toast.success("Invoice Deleted Successfully")
+      setIsDeleteDialogOpen(false)
+      router.back()
+    } catch (error) {
+      toast.error("Failed to delete invoice")
     }
   }
 
@@ -239,18 +242,6 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                       <DialogTitle>Email Invoice</DialogTitle>
                       <DialogDescription>Send this invoice to the guest via email.</DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="emailAddress">Email Address</Label>
-                        <Input
-                          id="emailAddress"
-                          type="email"
-                          value={emailAddress}
-                          onChange={(e) => setEmailAddress(e.target.value)}
-                          placeholder="Enter email address"
-                        />
-                      </div>
-                    </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)}>
                         Cancel
@@ -268,6 +259,30 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                   <Printer className="h-4 w-4" />
                   Print
                 </Button>
+
+
+                <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive" className="gap-1">
+                      <TrashIcon className="h-4 w-4" />
+                      Delete
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Delete Invoice</DialogTitle>
+                      <DialogDescription>Once Deleted cannot be recovered.</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleDeleteInvoice}>Delete</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+
               </div>
             </CardHeader>
             <CardContent>
@@ -310,6 +325,10 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                       <span className="text-muted-foreground">Mobile:</span>
                       <span className="font-medium">{invoice.guest_mobile}</span>
                     </div>
+                    {invoice.type === "resort"?<div className="flex justify-between">
+                      <span className="text-muted-foreground">Booking Date:</span>
+                      <span className="font-medium">{formatDate(invoice.booking_date)}</span>
+                </div>:<></>}
                   </div>
                 </div>
               </div>
@@ -318,7 +337,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                 <h3 className="text-lg font-medium mb-4">Invoice Items</h3>
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                  <TableRow>
                       <TableHead>Item</TableHead>
                       <TableHead className="text-right">Qty</TableHead>
                       <TableHead className="text-right">Rate</TableHead>

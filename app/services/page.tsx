@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { getServices, createService, updateService, deleteService } from "@/lib/api"
 import { Pencil, Plus, Trash2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -71,11 +71,7 @@ export default function ServicesPage() {
       const data = await getServices()
       setServices(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch services",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch services")
     } finally {
       setLoading(false)
     }
@@ -90,20 +86,13 @@ export default function ServicesPage() {
         gst_percentage: Number.parseInt(gstPercentage),
       })
 
-      toast({
-        title: "Success",
-        description: "Service created successfully",
-      })
+      toast.success("Service created successfully")
 
       resetForm()
       setIsAddDialogOpen(false)
       fetchServices()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create service",
-        variant: "destructive",
-      })
+      toast.error("Failed to create service")
     }
   }
 
@@ -119,20 +108,13 @@ export default function ServicesPage() {
         is_active: isActive ? 1 : 0,
       })
 
-      toast({
-        title: "Success",
-        description: "Service updated successfully",
-      })
+      toast.success("Service updated successfully")
 
       resetForm()
       setIsEditDialogOpen(false)
       fetchServices()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update service",
-        variant: "destructive",
-      })
+      toast.error("Failed to update service")
     }
   }
 
@@ -140,19 +122,12 @@ export default function ServicesPage() {
     try {
       await deleteService(serviceId)
 
-      toast({
-        title: "Success",
-        description: "Service deleted successfully",
-      })
+      toast.success("Service deleted successfully")
 
       fetchServices()
     } catch (error) {
       alert("Service cannot be deleted")
-      toast({
-        title: "Error",
-        description: "Failed to delete service",
-        variant: "destructive",
-      })
+      toast.error("Failed to delete service")
     }
   }
 

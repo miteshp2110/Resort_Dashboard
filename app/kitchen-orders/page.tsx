@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import {
   getKitchenOrders,
   getKitchenOrderDetails,
@@ -145,11 +145,7 @@ export default function KitchenOrdersPage() {
       const data = await getKitchenOrders(params)
       setOrders(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch kitchen orders",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch kitchen orders")
     } finally {
       setLoading(false)
     }
@@ -179,11 +175,7 @@ export default function KitchenOrdersPage() {
       setSelectedOrder(data)
       setIsViewDialogOpen(true)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch order details",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch order details")
     }
   }
 
@@ -191,10 +183,7 @@ export default function KitchenOrdersPage() {
     try {
       await updateKitchenOrderStatus(orderId, status)
 
-      toast({
-        title: "Success",
-        description: `Order status updated to ${status}`,
-      })
+      toast.success("Updated Order Status")
 
       fetchOrders()
 
@@ -205,11 +194,7 @@ export default function KitchenOrdersPage() {
         })
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update order status",
-        variant: "destructive",
-      })
+      toast.error("Failed to update order status")
     }
   }
 
@@ -220,19 +205,12 @@ export default function KitchenOrdersPage() {
         payment_method: "cash",
       })
 
-      toast({
-        title: "Success",
-        description: "Invoice created successfully",
-      })
+      toast.success("Invoice created successfully")
 
       fetchOrders()
       setIsViewDialogOpen(false)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create invoice",
-        variant: "destructive",
-      })
+      toast.error("Failed to create invoice")
     }
   }
 
@@ -272,11 +250,7 @@ export default function KitchenOrdersPage() {
 
   const handleCreateOrder = async () => {
     if (!guestName || orderItems.length === 0) {
-      toast({
-        title: "Error",
-        description: "Please fill all required fields and add at least one item",
-        variant: "destructive",
-      })
+      toast.error("Please fill all required fields and add at least one item")
       return
     }
 
@@ -296,20 +270,13 @@ export default function KitchenOrdersPage() {
 
       await createKitchenOrder(orderData)
 
-      toast({
-        title: "Success",
-        description: "Kitchen order created successfully",
-      })
+      toast.success("Kitchen order created successfully")
 
       resetForm()
       setIsAddDialogOpen(false)
       fetchOrders()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create kitchen order",
-        variant: "destructive",
-      })
+      toast.error("Failed to create kitchen order")
     }
   }
 

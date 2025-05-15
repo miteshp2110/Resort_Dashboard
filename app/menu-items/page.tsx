@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { getMenuItems, createMenuItem, updateMenuItem, deleteMenuItem } from "@/lib/api"
 import { Pencil, Plus, Trash2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -77,11 +77,7 @@ export default function MenuItemsPage() {
       const data = await getMenuItems(activeTab !== "all" ? activeTab : undefined)
       setMenuItems(data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch menu items",
-        variant: "destructive",
-      })
+      toast.error("Failed to fetch menu items")
     } finally {
       setLoading(false)
     }
@@ -97,20 +93,13 @@ export default function MenuItemsPage() {
         type,
       })
 
-      toast({
-        title: "Success",
-        description: "Menu item created successfully",
-      })
+      toast.success("Menu item created successfully")
 
       resetForm()
       setIsAddDialogOpen(false)
       fetchMenuItems()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create menu item",
-        variant: "destructive",
-      })
+      toast.error("Failed to create menu item")
     }
   }
 
@@ -127,20 +116,13 @@ export default function MenuItemsPage() {
         is_active: isActive ? 1 : 0,
       })
 
-      toast({
-        title: "Success",
-        description: "Menu item updated successfully",
-      })
+      toast.success("Menu item updated successfully")
 
       resetForm()
       setIsEditDialogOpen(false)
       fetchMenuItems()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update menu item",
-        variant: "destructive",
-      })
+      toast.error("Failed to update menu item")
     }
   }
 
@@ -148,18 +130,11 @@ export default function MenuItemsPage() {
     try {
       await deleteMenuItem(itemId)
 
-      toast({
-        title: "Success",
-        description: "Menu item deleted successfully",
-      })
+      toast.error("Menu item deleted successfully")
 
       fetchMenuItems()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete menu item",
-        variant: "destructive",
-      })
+      toast.error("Failed to delete menu item")
     }
   }
 

@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEffect } from "react"
-import { getSettings } from "@/lib/api"
+import {getSettings, imageHeaderPath} from "@/lib/api"
+import Image from "next/image";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
@@ -41,7 +42,16 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">{resortName}</CardTitle>
+          <div style={{display: 'flex', justifyContent: 'center'}}>
+            <Image
+                height={150}
+                width={150}
+                src={imageHeaderPath}
+                alt="Header Logo"
+            />
+          </div>
+
+          <CardTitle className="text-2xl font-bold">C R Resort</CardTitle>
           <CardDescription>Enter your credentials to access the dashboard</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

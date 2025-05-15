@@ -6,12 +6,22 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { toast } from "@/components/ui/use-toast"
-import { fetchApi } from "@/lib/api"
-import { ArrowLeft, Printer } from "lucide-react"
+import { toast } from "sonner"
+import {fetchApi, sendInvoiceEmail} from "@/lib/api"
+import {ArrowLeft, Mail, Printer} from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
 
 type ResortAggregatedInvoice = {
   resort_info: {
@@ -92,20 +102,38 @@ export default function ResortAggregatedInvoicePage() {
   const fromDate = searchParams.get("from_date")
   const toDate = searchParams.get("to_date")
   const guestName = searchParams.get("guest_name")
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
+  const [email,setEmail] = useState('')
 
   useEffect(() => {
     if (!fromDate || !toDate || !guestName) {
-      toast({
-        title: "Missing parameters",
-        description: "Please provide from date, to date and guest name",
-        variant: "destructive",
-      })
+      toast.error("All Fields Required")
       router.push("/invoices/aggregated")
       return
     }
 
     fetchAggregatedInvoices()
   }, [fromDate, toDate, guestName])
+
+  const handleSendEmail = async () => {
+    try {
+      if(email === ''){
+        alert("Please enter a valid email")
+        return
+      }
+      const params = new URLSearchParams(window.location.search);
+
+      const fromDate = params.get('from_date');
+      const toDate = params.get('to_date');
+      const guestName = params.get('guest_name');
+      sendInvoiceEmail(fromDate!!, toDate!!, guestName!!, email!!)
+      toast.success("Sent Email")
+      setIsEmailDialogOpen(false)
+    } catch (error) {
+      toast.error("Failed to send invoice email")
+      // alert("Failed to send invoice email")
+    }
+  }
 
   const fetchAggregatedInvoices = async () => {
     try {
@@ -115,11 +143,7 @@ export default function ResortAggregatedInvoicePage() {
       )
       setData(response.data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch aggregated invoices",
-        variant: "destructive",
-      })
+      toast.error("Failed to send Email")
     } finally {
       setLoading(false)
     }
@@ -151,10 +175,39 @@ export default function ResortAggregatedInvoicePage() {
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <Button variant="outline" className="gap-1" onClick={handlePrint}>
-          <Printer className="h-4 w-4" />
-          Print
-        </Button>
+        <div>
+          <Button variant="outline" className="gap-1" onClick={handlePrint}>
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
+          <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-1">
+                <Mail className="h-4 w-4" />
+                Email Invoice
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Email Invoice</DialogTitle>
+                <DialogDescription>Send this invoice to the guest via email.</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Input
+                placeholder="Enter email address"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required={true}
+
+                />
+                <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSendEmail}>Send</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {loading ? (

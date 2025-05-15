@@ -6,12 +6,21 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { toast } from "@/components/ui/use-toast"
-import { fetchApi } from "@/lib/api"
-import { ArrowLeft, Printer } from "lucide-react"
+import { toast } from "sonner"
+import {fetchApi, sendInvoiceEmail, sendKitchenEmail} from "@/lib/api"
+import {ArrowLeft, Mail, Printer} from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription, DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
 
 type KitchenAggregatedInvoice = {
   kitchen_info: {
@@ -98,14 +107,12 @@ export default function KitchenAggregatedInvoicePage() {
   const fromDate = searchParams.get("from_date")
   const toDate = searchParams.get("to_date")
   const guestName = searchParams.get("guest_name")
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
+  const [email,setEmail] = useState('')
 
   useEffect(() => {
     if (!fromDate || !toDate || !guestName) {
-      toast({
-        title: "Missing parameters",
-        description: "Please provide from date, to date and guest name",
-        variant: "destructive",
-      })
+     toast.error("All Fields Required")
       router.push("/invoices/aggregated")
       return
     }
@@ -121,11 +128,7 @@ export default function KitchenAggregatedInvoicePage() {
       )
       setData(response.data)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch aggregated invoices",
-        variant: "destructive",
-      })
+      toast.error("Failed to Fetch Invoice")
     } finally {
       setLoading(false)
     }
@@ -150,49 +153,97 @@ export default function KitchenAggregatedInvoicePage() {
     )
   }
 
+  const handleSendEmail = async () => {
+    try {
+      if(email === ''){
+        alert("Please enter a valid email")
+        return
+      }
+      const params = new URLSearchParams(window.location.search);
+
+      const fromDate = params.get('from_date');
+      const toDate = params.get('to_date');
+      const guestName = params.get('guest_name');
+      sendKitchenEmail(fromDate!!, toDate!!, guestName!!, email!!)
+      setIsEmailDialogOpen(false)
+    } catch (error) {
+      // toast.error("Failed to send invoice email")
+      alert("Failed to send invoice email")
+    }
+  }
+
   return (
     <DashboardLayout title="Kitchen Aggregated Invoice">
       <div className="mb-6 flex justify-between">
         <Button variant="outline" className="gap-1" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4"/>
           Back
         </Button>
-        <Button variant="outline" className="gap-1" onClick={handlePrint}>
-          <Printer className="h-4 w-4" />
-          Print
-        </Button>
+        <div>
+          <Button variant="outline" className="gap-1" onClick={handlePrint}>
+            <Printer className="h-4 w-4"/>
+            Print
+          </Button>
+          <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-1">
+                <Mail className="h-4 w-4"/>
+                Email Invoice
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Email Invoice</DialogTitle>
+                <DialogDescription>Send this invoice to the guest via email.</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Input
+                    placeholder="Enter email address"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required={true}
+
+                />
+                <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSendEmail}>Send</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {loading ? (
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-1/3" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-64 w-full" />
-        </div>
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-1/3"/>
+            <Skeleton className="h-32 w-full"/>
+            <Skeleton className="h-64 w-full"/>
+          </div>
       ) : data ? (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>{data.kitchen_info.resort_name}</CardTitle>
-                  <CardDescription className="mt-2">
-                    <p>{data.kitchen_info.resort_address}</p>
-                    <p>Phone: {data.kitchen_info.resort_contact}</p>
-                    <p>Email: {data.kitchen_info.resort_email}</p>
-                    <p>GSTIN: {data.kitchen_info.kitchen_gstin}</p>
-                  </CardDescription>
-                </div>
-                {data.kitchen_info.logo_path && (
-                  <div className="relative h-20 w-40">
-                    <Image
-                      src={`http://localhost:3001/${data.kitchen_info.logo_path}`}
-                      alt={data.kitchen_info.resort_name}
-                      fill
-                      className="object-contain"
-                    />
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle>{data.kitchen_info.resort_name}</CardTitle>
+                    <CardDescription className="mt-2">
+                      <p>{data.kitchen_info.resort_address}</p>
+                      <p>Phone: {data.kitchen_info.resort_contact}</p>
+                      <p>Email: {data.kitchen_info.resort_email}</p>
+                      <p>GSTIN: {data.kitchen_info.kitchen_gstin}</p>
+                    </CardDescription>
                   </div>
-                )}
+                  {data.kitchen_info.logo_path && (
+                      <div className="relative h-20 w-40">
+                        <Image
+                            src={`http://localhost:3001/${data.kitchen_info.logo_path}`}
+                            alt={data.kitchen_info.resort_name}
+                            fill
+                            className="object-contain"
+                        />
+                      </div>
+                  )}
               </div>
             </CardHeader>
             <CardContent>
