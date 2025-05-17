@@ -154,16 +154,14 @@ export default function KitchenAggregatedInvoicePrintPage() {
     <div className="p-8 max-w-4xl mx-auto">
       <div className="flex justify-between items-start mb-8">
         <div>
-          {data.kitchen_info.logo_path && (
-            <div className="relative h-20 w-40 mb-2">
-              <Image
-                src={`http://localhost:3001/${data.kitchen_info.logo_path}`}
-                alt={data.kitchen_info.resort_name}
+          <div className="relative h-20 w-40 mb-2">
+            <Image
+                src={`https://crresortapp.xyz/api/logo`}
+                alt={"Logo"}
                 fill
                 className="object-contain"
-              />
-            </div>
-          )}
+            />
+          </div>
           <h1 className="text-2xl font-bold">{data.kitchen_info.resort_name}</h1>
           <p className="whitespace-pre-line">{data.kitchen_info.resort_address}</p>
           <p>Phone: {data.kitchen_info.resort_contact}</p>

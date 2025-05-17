@@ -57,8 +57,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (username: string, password: string) => {
     try {
+      // https://playlist-backend.tech/resort/api/auth/login
       setIsLoading(true)
-      const response = await fetch("https://playlist-backend.tech/resort/api/auth/login", {
+      const response = await fetch("https://crresortapp.xyz/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
