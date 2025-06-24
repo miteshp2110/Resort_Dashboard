@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -32,6 +33,8 @@ type KitchenAggregatedInvoice = {
     guest_id: number
     room_number: string
     guest_name: string
+    company_name: string | null
+    gst_number: string | null
     guest_mobile: string | null
     subtotal: string
     tax_amount: string
@@ -44,6 +47,8 @@ type KitchenAggregatedInvoice = {
     created_by_name: string
     order_number: string
     order_type: string
+    check_in_time: string | null
+    check_out_time: string | null
     items: Array<{
       id: number
       invoice_id: number
@@ -204,6 +209,8 @@ export default function KitchenAggregatedInvoicePrintPage() {
               <p>Date: {formatDate(invoice.invoice_date)}</p>
               <p>Order #: {invoice.order_number}</p>
               <p>Type: {invoice.order_type.replace("_", " ")}</p>
+              {invoice.check_in_time && <p>Check-in Time: {invoice.check_in_time}</p>}
+              {invoice.check_out_time && <p>Check-out Time: {invoice.check_out_time}</p>}
             </div>
             <div className="text-right">
               <p>Status: {invoice.payment_status.toUpperCase()}</p>
@@ -232,8 +239,12 @@ export default function KitchenAggregatedInvoicePrintPage() {
                   </td>
                   <td className="text-right py-2">{item.quantity}</td>
                   <td className="text-right py-2">{formatCurrency(item.rate)}</td>
-                  <td className="text-right py-2">{item.gst_percentage}%</td>
-                  <td className="text-right py-2">{formatCurrency(item.gst_amount)}</td>
+                  <td className="text-right py-2">
+                    CGST: {Number(item.gst_percentage)/2}% + SGST: {Number(item.gst_percentage)/2}%
+                  </td>
+                  <td className="text-right py-2">
+                    {formatCurrency(Number(item.gst_amount)/2)} + {formatCurrency(Number(item.gst_amount)/2)}
+                  </td>
                   <td className="text-right py-2">{formatCurrency(item.total)}</td>
                 </tr>
               ))}
@@ -246,10 +257,16 @@ export default function KitchenAggregatedInvoicePrintPage() {
                 <td className="text-right font-medium py-2">{formatCurrency(invoice.subtotal)}</td>
               </tr>
               <tr>
-                <td colSpan={5} className="text-right font-medium py-2">
-                  Tax:
+                <td colSpan={5} className="text-right font-medium">
+                  CGST ({Number(invoice.items[0]?.gst_percentage)/2}%):
                 </td>
-                <td className="text-right font-medium py-2">{formatCurrency(invoice.tax_amount)}</td>
+                <td className="text-right font-medium">{formatCurrency(Number(invoice.tax_amount) / 2)}</td>
+              </tr>
+              <tr>
+                <td colSpan={5} className="text-right font-medium">
+                  SGST ({Number(invoice.items[0]?.gst_percentage)/2}%):
+                </td>
+                <td className="text-right font-medium">{formatCurrency(Number(invoice.tax_amount) / 2)}</td>
               </tr>
               <tr>
                 <td colSpan={5} className="text-right font-bold py-2">
@@ -278,8 +295,12 @@ export default function KitchenAggregatedInvoicePrintPage() {
               <td className="text-right">{formatCurrency(data.summary.total_subtotal)}</td>
             </tr>
             <tr>
-              <td className="font-medium">Total Tax:</td>
-              <td className="text-right">{formatCurrency(data.summary.total_tax)}</td>
+              <td className="font-medium">Total CGST (9%):</td>
+              <td className="text-right">{formatCurrency(data.summary.total_tax / 2)}</td>
+            </tr>
+            <tr>
+              <td className="font-medium">Total SGST (9%):</td>
+              <td className="text-right">{formatCurrency(data.summary.total_tax / 2)}</td>
             </tr>
             <tr className="border-t border-gray-200">
               <td className="font-bold text-lg py-2">Grand Total:</td>
@@ -289,9 +310,44 @@ export default function KitchenAggregatedInvoicePrintPage() {
         </table>
       </div>
 
-      <div className="text-center text-sm text-gray-500 mt-12">
+      {/* <div className="text-center text-sm text-gray-500 mt-12">
         <p>This is a computer-generated document. No signature is required.</p>
+      </div> */}
+
+      {/* Signature section at the bottom */}
+      <div style={{ flex: 1 }} />
+      <div className="mt-12 flex justify-between print-signatures">
+        <div className="text-center print-signature-box">
+          <div className="border-t-2 border-gray-400 w-48 pt-2 mx-auto">
+            <p className="font-bold">Manager Signature</p>
+          </div>
+        </div>
+        <div className="text-center print-signature-box">
+          <div className="border-t-2 border-gray-400 w-48 pt-2 mx-auto">
+            <p className="font-bold">Customer Signature</p>
+          </div>
+        </div>
       </div>
+      <style jsx global>{`
+        @media print {
+          body { zoom: 0.75; }
+          .print-signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 48px;
+            page-break-inside: avoid;
+            align-items: flex-end;
+            min-height: 80px;
+          }
+          .print-signature-box {
+            width: 40%;
+            text-align: center;
+            border-top: none;
+            padding-top: 0;
+            font-size: 1rem;
+          }
+        }
+      `}</style>
     </div>
   )
 }

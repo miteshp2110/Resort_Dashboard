@@ -20,6 +20,8 @@ type Guest = {
   name: string
   mobile: string
   room_number: string
+  company_name?: string
+  gst_number?: string
 }
 
 type Service = {
@@ -49,8 +51,12 @@ export default function NewInvoicePage() {
   const [guestId, setGuestId] = useState("")
   const [roomNumber, setRoomNumber] = useState("")
   const [guestName, setGuestName] = useState("")
+  const [companyName, setCompanyName] = useState("")
+  const [gstNumber, setGstNumber] = useState("")
   const [bookingDate, setBookingDate] = useState("")
   const [guestMobile, setGuestMobile] = useState("")
+  const [checkInTime, setCheckInTime] = useState("")
+  const [checkOutTime, setCheckOutTime] = useState("")
   const [paymentStatus, setPaymentStatus] = useState("pending")
   const [paymentMethod, setPaymentMethod] = useState("cash")
   const [notes, setNotes] = useState("")
@@ -115,12 +121,16 @@ export default function NewInvoicePage() {
         setGuestName(guest.name)
         setRoomNumber(guest.room_number)
         setGuestMobile(guest.mobile)
+        setCompanyName(guest.company_name || "")
+        setGstNumber(guest.gst_number || "")
       }
     } else {
       // Clear fields for manual entry
       setGuestName("")
       setRoomNumber("")
       setGuestMobile("")
+      setCompanyName("")
+      setGstNumber("")
     }
   }
 
@@ -162,6 +172,8 @@ export default function NewInvoicePage() {
         guest_id: guestId ? Number.parseInt(guestId) : null,
         room_number: roomNumber,
         guest_name: guestName,
+        company_name: companyName,
+        gst_number: gstNumber,
         guest_mobile: guestMobile,
         type: "resort",
         items: invoiceItems.map((item) => ({
@@ -174,7 +186,9 @@ export default function NewInvoicePage() {
         payment_status: paymentStatus,
         payment_method: paymentMethod,
         notes,
-        bookingDate: bookingDate
+        bookingDate: bookingDate,
+        check_in_time: checkInTime,
+        check_out_time: checkOutTime
       }
 
       const response = await createInvoice(invoiceData)
@@ -300,6 +314,53 @@ export default function NewInvoicePage() {
                       />
                     </div>
                 )}
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">Company Name</Label>
+                    <Input
+                        id="companyName"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder="Company name (optional)"
+                        disabled={!isNewGuest && !!guestId}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gstNumber">GST Number</Label>
+                    <Input
+                        id="gstNumber"
+                        value={gstNumber}
+                        onChange={(e) => setGstNumber(e.target.value)}
+                        placeholder="GST number (optional)"
+                        disabled={!isNewGuest && !!guestId}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="checkInTime">Check-in Time</Label>
+                    <Input
+                        type="time"
+                        id="checkInTime"
+                        value={checkInTime}
+                        onChange={(e) => setCheckInTime(e.target.value)}
+                        placeholder="Check-in time"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="checkOutTime">Check-out Time</Label>
+                    <Input
+                        type="time"
+                        id="checkOutTime"
+                        value={checkOutTime}
+                        onChange={(e) => setCheckOutTime(e.target.value)}
+                        placeholder="Check-out time"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="bookingDate">Booking Date</Label>
                   <Input

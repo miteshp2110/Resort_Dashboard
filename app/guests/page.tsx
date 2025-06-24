@@ -30,6 +30,8 @@ type Guest = {
   check_in_date: string
   check_out_date: string
   created_at: string
+  company_name: string | null
+  gst_number: string | null
 }
 
 export default function GuestsPage() {
@@ -45,6 +47,8 @@ export default function GuestsPage() {
   const [roomNumber, setRoomNumber] = useState("")
   const [checkInDate, setCheckInDate] = useState("")
   const [checkOutDate, setCheckOutDate] = useState("")
+  const [companyName, setCompanyName] = useState("")
+  const [gstNumber, setGstNumber] = useState("")
 
   useEffect(() => {
     fetchGuests()
@@ -75,6 +79,8 @@ export default function GuestsPage() {
         room_number: roomNumber,
         check_in_date: new Date(checkInDate).toISOString(),
         check_out_date: new Date(checkOutDate).toISOString(),
+        company_name: companyName,
+        gst_number: gstNumber
       })
 
       toast.success("Guests added successfully.")
@@ -94,6 +100,8 @@ export default function GuestsPage() {
     setRoomNumber("")
     setCheckInDate("")
     setCheckOutDate("")
+    setCompanyName("")
+    setGstNumber("")
   }
 
   const formatDate = (dateString: string) => {
@@ -196,6 +204,26 @@ export default function GuestsPage() {
                       />
                     </div>
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="companyName">Company Name</Label>
+                      <Input
+                        id="companyName"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder="Enter company name (optional)"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="gstNumber">GST Number</Label>
+                      <Input
+                        id="gstNumber"
+                        value={gstNumber}
+                        onChange={(e) => setGstNumber(e.target.value)}
+                        placeholder="Enter GST number (optional)"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
@@ -223,6 +251,8 @@ export default function GuestsPage() {
                   <TableHead>Room</TableHead>
                   <TableHead>Mobile</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Company</TableHead>
+                  <TableHead>GST Number</TableHead>
                   <TableHead>Check-in</TableHead>
                   <TableHead>Check-out</TableHead>
                 </TableRow>
@@ -230,7 +260,7 @@ export default function GuestsPage() {
               <TableBody>
                 {guests.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center">
+                    <TableCell colSpan={8} className="text-center">
                       No guests found
                     </TableCell>
                   </TableRow>
@@ -241,6 +271,8 @@ export default function GuestsPage() {
                       <TableCell>{guest.room_number}</TableCell>
                       <TableCell>{guest.mobile}</TableCell>
                       <TableCell>{guest.email}</TableCell>
+                      <TableCell>{guest.company_name || '-'}</TableCell>
+                      <TableCell>{guest.gst_number || '-'}</TableCell>
                       <TableCell>{formatDate(guest.check_in_date)}</TableCell>
                       <TableCell>{formatDate(guest.check_out_date)}</TableCell>
                     </TableRow>
