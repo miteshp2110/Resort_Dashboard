@@ -5,7 +5,7 @@ type FetchOptions = {
   isFormData?: boolean
 }
 const baseUrl = "https://crresortapp.xyz/api"
-// const baseUrl = "https://playlist-backend.tech/resort/api"
+// const baseUrl = "http://localhost:3001/api"
 
 
 export const imageHeaderPath = `${baseUrl}/logo`
@@ -14,8 +14,6 @@ export const imageHeaderPath2 = `${baseUrl}/logo/footer`
 
 export async function   fetchApi(endpoint: string, options: FetchOptions = {}) {
   const token = localStorage.getItem("token")
-  // const baseUrl = "http://localhost:3001/api"
-  const baseUrl = "https://crresortapp.xyz/api"
   const url = `${baseUrl}${endpoint}`
 
   const headers: Record<string, string> = {

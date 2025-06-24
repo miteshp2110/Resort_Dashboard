@@ -12,6 +12,8 @@ type InvoiceDetail = {
   guest_id: number
   room_number: string
   guest_name: string
+  company_name: string | null
+  gst_number: string | null
   guest_mobile: string
   type: string
   subtotal: number
@@ -22,6 +24,8 @@ type InvoiceDetail = {
   notes: string | null
   created_by: number
   created_by_name: string
+  check_in_time: string | null
+  check_out_time: string | null
   items: Array<{
     id: number
     invoice_id: number
@@ -109,7 +113,7 @@ export default function PrintInvoicePage({ params }: { params: { id: string } })
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto flex flex-col min-h-[90vh]">
       <div className="flex justify-between items-start mb-8">
         <div>
           <div className="relative h-40 w-60 mb-2">
@@ -135,11 +139,22 @@ export default function PrintInvoicePage({ params }: { params: { id: string } })
         </div>
       </div>
 
-      <div className="border-t border-b border-gray-200 py-4 mb-6">
-        <h3 className="font-bold mb-2">Bill To:</h3>
-        <p className="font-medium">{invoice.guest_name}</p>
-        <p>Room: {invoice.room_number}</p>
-        {invoice.guest_mobile && <p>Phone: {invoice.guest_mobile}</p>}
+      <div className="flex flex-row gap-8 border-t border-b border-gray-200 py-4 mb-6">
+        <div className="flex-1">
+          <h3 className="font-bold mb-2">Bill To:</h3>
+          <p className="font-medium">{invoice.guest_name}</p>
+          {invoice.company_name && <p>Company: {invoice.company_name}</p>}
+          {invoice.gst_number && <p>GST Number: {invoice.gst_number}</p>}
+          <p>Room: {invoice.room_number}</p>
+          {invoice.guest_mobile && <p>Phone: {invoice.guest_mobile}</p>}
+          {invoice.check_in_time && <p>Check-in Time: {invoice.check_in_time}</p>}
+          {invoice.check_out_time && <p>Check-out Time: {invoice.check_out_time}</p>}
+        </div>
+        <div className="flex-1">
+          <h3 className="font-bold mb-2">Payment Info:</h3>
+          <p>Method: {invoice.payment_method.replace("_", " ").toUpperCase()}</p>
+          <p>Status: {invoice.payment_status.toUpperCase()}</p>
+        </div>
       </div>
 
       <table className="w-full mb-6">
@@ -159,8 +174,12 @@ export default function PrintInvoicePage({ params }: { params: { id: string } })
               <td className="py-2">{item.item_name}</td>
               <td className="text-right py-2">{item.quantity}</td>
               <td className="text-right py-2">{formatCurrency(item.rate)}</td>
-              <td className="text-right py-2">{item.gst_percentage}%</td>
-              <td className="text-right py-2">{formatCurrency(item.gst_amount)}</td>
+              <td className="text-right py-2">
+                CGST: {item.gst_percentage/2}% + SGST: {item.gst_percentage/2}%
+              </td>
+              <td className="text-right py-2">
+                {formatCurrency(item.gst_amount/2)} + {formatCurrency(item.gst_amount/2)}
+              </td>
               <td className="text-right py-2">{formatCurrency(item.total)}</td>
             </tr>
           ))}
@@ -174,9 +193,15 @@ export default function PrintInvoicePage({ params }: { params: { id: string } })
           </tr>
           <tr>
             <td colSpan={5} className="text-right font-medium py-2">
-              Tax:
+              CGST ({invoice.items[0]?.gst_percentage/2}%):
             </td>
-            <td className="text-right font-medium py-2">{formatCurrency(invoice.tax_amount)}</td>
+            <td className="text-right font-medium py-2">{formatCurrency(invoice.tax_amount / 2)}</td>
+          </tr>
+          <tr>
+            <td colSpan={5} className="text-right font-medium py-2">
+              SGST ({invoice.items[0]?.gst_percentage/2}%):
+            </td>
+            <td className="text-right font-medium py-2">{formatCurrency(invoice.tax_amount / 2)}</td>
           </tr>
           <tr className="border-t border-gray-200">
             <td colSpan={5} className="text-right font-bold py-2">
@@ -187,12 +212,6 @@ export default function PrintInvoicePage({ params }: { params: { id: string } })
         </tfoot>
       </table>
 
-      <div className="mb-6">
-        <h3 className="font-bold mb-2">Payment Information:</h3>
-        <p>Method: {invoice.payment_method.replace("_", " ").toUpperCase()}</p>
-        <p>Status: {invoice.payment_status.toUpperCase()}</p>
-      </div>
-
       {invoice.notes && (
         <div className="mb-6">
           <h3 className="font-bold mb-2">Notes:</h3>
@@ -200,9 +219,45 @@ export default function PrintInvoicePage({ params }: { params: { id: string } })
         </div>
       )}
 
-      <div className="text-center text-sm text-gray-500 mt-12">
+      <div style={{ flex: 1 }} />
+
+      <div className="mt-12 flex justify-between print-signatures">
+        <div className="text-center print-signature-box">
+          <div className="border-t-2 border-gray-400 w-48 pt-2 mx-auto">
+            <p className="font-bold">Manager Signature</p>
+          </div>
+        </div>
+        <div className="text-center print-signature-box">
+          <div className="border-t-2 border-gray-400 w-48 pt-2 mx-auto">
+            <p className="font-bold">Customer Signature</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="text-center text-sm text-gray-500 mt-8">
         <p>Thank you for your business!</p>
       </div>
+
+      <style jsx global>{`
+        @media print {
+          body { zoom: 0.75; }
+          .print-signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 48px;
+            page-break-inside: avoid;
+            align-items: flex-end;
+            min-height: 80px;
+          }
+          .print-signature-box {
+            width: 40%;
+            text-align: center;
+            border-top: none;
+            padding-top: 0;
+            font-size: 1rem;
+          }
+        }
+      `}</style>
     </div>
   )
 }

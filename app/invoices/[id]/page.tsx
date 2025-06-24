@@ -32,6 +32,8 @@ type InvoiceDetail = {
   guest_id: number
   room_number: string
   guest_name: string
+  company_name: string | null
+  gst_number: string | null
   guest_mobile: string
   type: string
   subtotal: number
@@ -42,7 +44,9 @@ type InvoiceDetail = {
   notes: string | null
   created_by: number
   created_by_name: string
-  booking_date:string
+  booking_date: string
+  check_in_time: string | null
+  check_out_time: string | null
   items: Array<{
     id: number
     invoice_id: number
@@ -65,7 +69,8 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-
+  const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false)
+  const [checkoutTime, setCheckoutTime] = useState("")
 
   // Form states
   const [paymentStatus, setPaymentStatus] = useState("")
@@ -132,6 +137,20 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
       router.back()
     } catch (error) {
       toast.error("Failed to delete invoice")
+    }
+  }
+
+  const handleUpdateCheckoutTime = async () => {
+    try {
+      await updateInvoicePayment(Number.parseInt(params.id), {
+        check_out_time: checkoutTime
+      })
+
+      toast.success("Checkout time updated successfully")
+      setIsCheckoutDialogOpen(false)
+      fetchInvoiceDetails()
+    } catch (error) {
+      toast.error("Failed to update checkout time")
     }
   }
 
@@ -251,6 +270,35 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                   </DialogContent>
                 </Dialog>
 
+                <Dialog open={isCheckoutDialogOpen} onOpenChange={setIsCheckoutDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">Update Checkout Time</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Update Checkout Time</DialogTitle>
+                      <DialogDescription>Update the checkout time for this invoice.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="checkoutTime">Checkout Time</Label>
+                        <Input
+                          id="checkoutTime"
+                          type="time"
+                          value={checkoutTime}
+                          onChange={(e) => setCheckoutTime(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsCheckoutDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleUpdateCheckoutTime}>Update</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
                 <Button
                   variant="outline"
                   className="gap-1"
@@ -317,6 +365,18 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                       <span className="text-muted-foreground">Name:</span>
                       <span className="font-medium">{invoice.guest_name}</span>
                     </div>
+                    {invoice.company_name && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Company:</span>
+                        <span className="font-medium">{invoice.company_name}</span>
+                      </div>
+                    )}
+                    {invoice.gst_number && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">GST Number:</span>
+                        <span className="font-medium">{invoice.gst_number}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Room Number:</span>
                       <span className="font-medium">{invoice.room_number}</span>
@@ -325,6 +385,18 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                       <span className="text-muted-foreground">Mobile:</span>
                       <span className="font-medium">{invoice.guest_mobile}</span>
                     </div>
+                    {invoice.check_in_time && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Check-in Time:</span>
+                        <span className="font-medium">{invoice.check_in_time}</span>
+                      </div>
+                    )}
+                    {invoice.check_out_time && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Check-out Time:</span>
+                        <span className="font-medium">{invoice.check_out_time}</span>
+                      </div>
+                    )}
                     {invoice.type === "resort"?<div className="flex justify-between">
                       <span className="text-muted-foreground">Booking Date:</span>
                       <span className="font-medium">{formatDate(invoice.booking_date)}</span>
@@ -337,7 +409,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                 <h3 className="text-lg font-medium mb-4">Invoice Items</h3>
                 <Table>
                   <TableHeader>
-                  <TableRow>
+                    <TableRow>
                       <TableHead>Item</TableHead>
                       <TableHead className="text-right">Qty</TableHead>
                       <TableHead className="text-right">Rate</TableHead>
@@ -352,8 +424,12 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                         <TableCell>{item.item_name}</TableCell>
                         <TableCell className="text-right">{item.quantity}</TableCell>
                         <TableCell className="text-right">{formatCurrency(item.rate)}</TableCell>
-                        <TableCell className="text-right">{item.gst_percentage}%</TableCell>
-                        <TableCell className="text-right">{formatCurrency(item.gst_amount)}</TableCell>
+                        <TableCell className="text-right">
+                          CGST: {item.gst_percentage/2}% + SGST: {item.gst_percentage/2}%
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(item.gst_amount/2)} + {formatCurrency(item.gst_amount/2)}
+                        </TableCell>
                         <TableCell className="text-right">{formatCurrency(item.total)}</TableCell>
                       </TableRow>
                     ))}
@@ -365,9 +441,15 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={5} className="text-right font-medium">
-                        Tax:
+                        CGST ({invoice.items[0]?.gst_percentage/2}%):
                       </TableCell>
-                      <TableCell className="text-right font-medium">{formatCurrency(invoice.tax_amount)}</TableCell>
+                      <TableCell className="text-right font-medium">{formatCurrency(invoice.tax_amount / 2)}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-right font-medium">
+                        SGST ({invoice.items[0]?.gst_percentage/2}%):
+                      </TableCell>
+                      <TableCell className="text-right font-medium">{formatCurrency(invoice.tax_amount / 2)}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={5} className="text-right font-medium">
