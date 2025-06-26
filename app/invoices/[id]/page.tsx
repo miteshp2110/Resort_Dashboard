@@ -59,6 +59,9 @@ type InvoiceDetail = {
     gst_amount: number
     total: number
   }>
+  number_of_people?: number
+  check_in_date?: string
+  check_out_date?: string
 }
 
 export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
@@ -270,34 +273,36 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                   </DialogContent>
                 </Dialog>
 
-                <Dialog open={isCheckoutDialogOpen} onOpenChange={setIsCheckoutDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">Update Checkout Time</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Update Checkout Time</DialogTitle>
-                      <DialogDescription>Update the checkout time for this invoice.</DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="checkoutTime">Checkout Time</Label>
-                        <Input
-                          id="checkoutTime"
-                          type="time"
-                          value={checkoutTime}
-                          onChange={(e) => setCheckoutTime(e.target.value)}
-                        />
+                {invoice.type !== 'kitchen' && (
+                  <Dialog open={isCheckoutDialogOpen} onOpenChange={setIsCheckoutDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">Update Checkout Time</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Update Checkout Time</DialogTitle>
+                        <DialogDescription>Update the checkout time for this invoice.</DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="checkoutTime">Checkout Time</Label>
+                          <Input
+                            id="checkoutTime"
+                            type="time"
+                            value={checkoutTime}
+                            onChange={(e) => setCheckoutTime(e.target.value)}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsCheckoutDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleUpdateCheckoutTime}>Update</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsCheckoutDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleUpdateCheckoutTime}>Update</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
 
                 <Button
                   variant="outline"
@@ -401,6 +406,24 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                       <span className="text-muted-foreground">Booking Date:</span>
                       <span className="font-medium">{formatDate(invoice.booking_date)}</span>
                 </div>:<></>}
+                    {invoice.type !== 'kitchen' && invoice.number_of_people && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Number of People:</span>
+                        <span className="font-medium">{invoice.number_of_people}</span>
+                      </div>
+                    )}
+                    {invoice.check_in_date && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Check-in Date:</span>
+                        <span className="font-medium">{formatDate(invoice.check_in_date)}</span>
+                      </div>
+                    )}
+                    {invoice.check_out_date && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Check-out Date:</span>
+                        <span className="font-medium">{formatDate(invoice.check_out_date)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -38,6 +38,9 @@ type InvoiceDetail = {
     gst_amount: number
     total: number
   }>
+  number_of_people?: number
+  check_in_date?: string
+  check_out_date?: string
 }
 
 type Settings = {
@@ -149,6 +152,9 @@ export default function PrintInvoicePage({ params }: { params: { id: string } })
           {invoice.guest_mobile && <p>Phone: {invoice.guest_mobile}</p>}
           {invoice.check_in_time && <p>Check-in Time: {invoice.check_in_time}</p>}
           {invoice.check_out_time && <p>Check-out Time: {invoice.check_out_time}</p>}
+          {invoice.type !== 'kitchen' && invoice.number_of_people && <p>Number of People: {invoice.number_of_people}</p>}
+          {invoice.check_in_date && <p>Check-in Date: {formatDate(invoice.check_in_date)}</p>}
+          {invoice.check_out_date && <p>Check-out Date: {formatDate(invoice.check_out_date)}</p>}
         </div>
         <div className="flex-1">
           <h3 className="font-bold mb-2">Payment Info:</h3>

@@ -6,6 +6,8 @@ type FetchOptions = {
 }
 const baseUrl = "https://crresortapp.xyz/api"
 // const baseUrl = "http://localhost:3001/api"
+// const baseUrl = "https://playlist-backend.tech/resort/api"
+
 
 
 export const imageHeaderPath = `${baseUrl}/logo`
