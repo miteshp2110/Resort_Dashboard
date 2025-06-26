@@ -66,7 +66,9 @@ export default function NewInvoicePage() {
   const [isNewGuest, setIsNewGuest] = useState(false)
   const [guestSearchTerm, setGuestSearchTerm] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
-
+  const [numberOfPeople, setNumberOfPeople] = useState(1)
+  const [checkInDate, setCheckInDate] = useState("")
+  const [checkOutDate, setCheckOutDate] = useState("")
 
   useEffect(() => {
     // Redirect if user doesn't have permission
@@ -188,7 +190,10 @@ export default function NewInvoicePage() {
         notes,
         bookingDate: bookingDate,
         check_in_time: checkInTime,
-        check_out_time: checkOutTime
+        check_out_time: checkOutTime,
+        number_of_people: numberOfPeople,
+        check_in_date: checkInDate,
+        check_out_date: checkOutDate
       }
 
       const response = await createInvoice(invoiceData)
@@ -370,6 +375,40 @@ export default function NewInvoicePage() {
                       onChange={(e) => setBookingDate(e.target.value)}
                       placeholder="the booking date"
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="numberOfPeople">Number of People</Label>
+                    <Input
+                      id="numberOfPeople"
+                      type="number"
+                      min={1}
+                      value={numberOfPeople}
+                      onChange={e => setNumberOfPeople(Math.max(1, parseInt(e.target.value) || 1))}
+                      placeholder="Number of people"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="checkInDate">Check-in Date</Label>
+                    <Input
+                      id="checkInDate"
+                      type="date"
+                      value={checkInDate}
+                      onChange={e => setCheckInDate(e.target.value)}
+                      placeholder="Check-in date"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="checkOutDate">Check-out Date</Label>
+                    <Input
+                      id="checkOutDate"
+                      type="date"
+                      value={checkOutDate}
+                      onChange={e => setCheckOutDate(e.target.value)}
+                      placeholder="Check-out date"
+                    />
+                  </div>
                 </div>
               </div>
 
